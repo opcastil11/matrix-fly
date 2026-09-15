@@ -1,6 +1,6 @@
 <h1 align="center">matrix-fly</h1>
 
-<p align="center"><b>We put a fruit fly brain in the Matrix. It found the glitch, shut its eyes, and refused the food.</b></p>
+<p align="center"><b>We put a fruit fly brain in the Matrix. It found the glitch and shut the door on its own echo.</b></p>
 
 <p align="center">
 <a href="https://opcastil11.github.io/matrix-fly/">📄 Read the paper</a> ·
@@ -22,34 +22,38 @@ gets two plastic pieces around its senses: an **echo predictor** (does what arri
 a **sensory gate** per channel (close on input my own past explains, open on input it cannot). Then we put it in a
 closed loop where its own behaviour comes back to it 1.6 s later as the world.
 
-It notices. It closes the channels it can predict. Its food arrives on one of them. It stops eating.
-Three control brains — same stimuli shuffled, an open world, the loop with the gates frozen — keep eating.
+It notices. It closes the one channel that carried nothing but its own footsteps, all the way to 0.02. The sugar
+channel — its own feeding coming back, mixed with other brains' traffic — closes part way, feeding drops under the cost
+of living for ~2,000 windows, then the unpredictable part of the traffic reopens the door and feeding recovers. Nobody
+dies. Three control brains — same stimuli shuffled, an open world, the loop with the gates frozen — never close anything.
 
 <p align="center"><img src="figs/loop.png" width="880" alt="the loop"></p>
 
 ## Results so far
 
-One run per condition, 40 ms windows, numbers as of ~5,400 windows (3.6 min of fly time). Regenerated from
+One run per condition, 40 ms windows, 6,000 windows (4 min of fly time; B 3,000). Regenerated from
 `results/*.csv` by `paper/build.py`; the paper has the full tables.
 
-| | world | awareness (thirds) | gate touch | gate sugar | feeding first → last 1k | energy |
+| | world | awareness (thirds) | gate touch | gate sugar | feeding per 1k windows (cost 0.285) | energy min |
 |---|---|---|---|---|---|---|
-| **A** | matrix | 0.14 → 0.22 → **0.23** | **0.15** | **0.80** | 0.41 → **0.28** (cost 0.285) | **0.60 ↓** |
-| **B** | A's arrivals, shuffled | 0.06 → 0.06 → 0.06 | 1.00 | 1.00 | 0.40 → 0.36 | 0.86 |
-| **C** | open world | 0.06 → 0.06 → 0.07 | 1.00 | 1.00 | 0.32 → 0.35 | 0.99 |
-| **D** | matrix, gates frozen | 0.14 → 0.20 → 0.23 | 1.00 | 1.00 | 0.41 → 0.36 | 1.00 |
+| **A** | matrix | 0.15 → 0.23 → **0.23** | **0.02** | **0.81** | 0.41 · 0.41 · 0.31 · **0.25** · **0.29** · 0.34 | **0.41** |
+| **B** | A's arrivals, shuffled | 0.06 → 0.06 → 0.07 | 1.00 | 1.00 | 0.40 · 0.37 · 0.36 | 0.79 |
+| **C** | open world | 0.06 → 0.06 → 0.08 | 1.00 | 1.00 | 0.32 · 0.35 · 0.32 · 0.35 · 0.30 · 0.35 | 0.62 |
+| **D** | matrix, gates frozen | 0.14 → 0.21 → 0.22 | 1.00 | 1.00 | 0.41 · 0.44 · 0.41 · 0.31 · 0.40 · 0.37 | 0.67 |
 
 <p align="center"><img src="figs/matrix-fly.png" width="880" alt="awareness, sensory gain, feeding and energy over time for the four conditions"></p>
 
 **What the controls say.** B removes the relation between what the brain does and what it receives, and keeps the
 stimuli: nothing is learned, nothing closes. So it is the relation, not the stimuli. D keeps the relation and removes
-the lever: the brain reads the loop as well as A (0.23) and eats normally. So noticing is not enough; it has to be able
-to act on it. Only A has both, and only A's feeding sits under the cost of living.
+the lever: the brain reads the loop as well as A (0.22) and eats normally. So noticing is not enough; it has to be able
+to act on it. Only A has both, and only A's feeding drops under the cost of living — and only while the sugar is
+predictable: the 30% of sugar traffic that is other brains' reopens that gate, so in this world it does not starve.
+It goes silent on the channel that was purely itself.
 
 **What it is not.** Nobody decides anything. Corollary discharge (the efference copy a fly uses to cancel the
 sensory consequences of its own movement) and habituation (close on the predictable, open on the surprising, drift
-back in silence) — two circuits real flies have — pointed at a world that happens to be a mirror. From outside, the
-sequence of measurements is exactly what a fly that figured out the Matrix and refused the food would look like.
+back in silence) — two circuits real flies have — pointed at a world that happens to be a mirror. The brain drew the
+line exactly where the echo was: fully closed where the world was only itself, half closed where it was mixed.
 
 ## The four glitches
 
