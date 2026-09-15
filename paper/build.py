@@ -136,7 +136,7 @@ def sec_results():
 <p><b>The controls say what it is.</b> D shows the prediction alone does nothing to behaviour — it learns the loop just as well as A ({f3(runs['D']['aw3'][2])} vs {f3(A['aw3'][2])} in the last third) and keeps eating, because it cannot act on what it learned. C shows an open world with the same channel and intensity statistics does not produce the effect{(". B is the decisive one: the <i>identical</i> arrivals A received, in shuffled order, produce awareness " + f3(runs['B']['aw3'][2]) + ", gates at 1 and feeding " + f3(runs['B']['feed_last']) + " — the same stimuli, taken out of their relation to what the brain did, are just food") if 'B' in runs else ""}.</p>"""
 
 figs_note = ""
-page = f"""<title>The Fly in the Matrix</title>
+page = f"""<title>The Fly Finds the Glitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -152,6 +152,7 @@ h3{{font-size:1.05rem;font-weight:600;margin:26px 0 8px}}
 p{{margin:0 0 16px}}
 .eyebrow,.mono,table,figcaption,.cl,.ct{{font-family:"IBM Plex Mono",ui-monospace,monospace}}
 .eyebrow{{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}}
+.sub{{font-family:Fraunces,Georgia,serif;font-size:1.15rem;line-height:1.35;color:var(--mute);margin:0 0 14px;text-wrap:balance}}
 .byline{{color:var(--mute);font-size:.95rem;margin-bottom:28px}}
 .abstract{{background:var(--soft);padding:18px 22px;border-left:3px solid var(--a);margin:0 0 8px}}
 .abstract p:last-child{{margin:0}}
@@ -187,7 +188,8 @@ ol.refs{{padding-left:1.4em;font-size:.92rem}}ol.refs li{{margin-bottom:8px}}
 </style>
 <main>
 <div class="eyebrow">preprint · pumpbrains.com · 15 september 2026 · runs as of build</div>
-<h1>A fruit fly brain in a closed loop learns that the world is its own echo, and stops taking the food</h1>
+<h1>We put a fruit fly brain in the Matrix. It found the glitch, shut its eyes, and refused the food.</h1>
+<p class="sub">A 165,122-neuron connectome in a closed loop learns that the world is its own echo, closes the senses it can predict, and starves next to the sugar — while three control brains keep eating</p>
 <div class="byline">PumpBrains · code, data and figures: <a href="https://github.com/opcastil11/matrix-fly">github.com/opcastil11/matrix-fly</a></div>
 
 <div class="abstract">
