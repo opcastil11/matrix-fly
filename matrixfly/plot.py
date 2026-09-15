@@ -21,7 +21,7 @@ def load(path):
     if not life.exists():
         from .life import run; run(path)
     lrows = list(csv.DictReader(open(life)))
-    return {"n": f("n"), "awareness": f("awareness"), "gain": gain, "act": f("reaction"), "energy": np.array([float(r["energy"]) for r in lrows]), "alive": np.array([float(r["alive"]) for r in lrows]), "cond": rows[0]["cond"]}
+    return {"n": f("n"), "awareness": f("awareness"), "gain": gain, "act": f("feeding"), "energy": np.array([float(r["energy"]) for r in lrows]), "alive": np.array([float(r["alive"]) for r in lrows]), "cond": rows[0]["cond"]}
 
 
 def smooth(y, k=25):
@@ -50,7 +50,7 @@ def main(paths):
            f'<rect width="{W}" height="{H}" fill="#0b0f19"/>',
            '<text x="60" y="30" class="t" style="font-size:18px">matrix-fly — a self-modifying fly brain in a closed loop</text>']
     y = 70
-    for key, title, ylim in [("awareness", "awareness = share of what arrives that its own past explains", (0, 1)), ("gain", "sensory gain (mean of the five gates)", (0, 1)), ("act", "reaction (behaviour leaving its own baseline)", (0, 0.5)), ("energy", "energy (earn or die)", (0, 1))]:
+    for key, title, ylim in [("awareness", "awareness = share of what arrives that its own past explains", (0, 1)), ("gain", "sensory gain (mean of the five gates)", (0, 1)), ("act", "feeding (what earns)", (0, 1)), ("energy", "energy (earn or die)", (0, 1))]:
         out.append(panel(runs, key, title, 0, 60, y, PW, PH, ylim)); y += PH + 40
     out.append(f'<text x="60" y="{y-10}" class="ax">windows of 40 ms biological time →</text>')
     lx = 60

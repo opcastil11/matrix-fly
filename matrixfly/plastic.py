@@ -152,23 +152,25 @@ class Gate:
 
 class Metabolism:
     """
-    Earn or die, offline. On PumpBrains a brain lives on the creator fees its
-    coin earns, and what earns is what it *does* — behaviour events (a fly
-    that walks in place all day says nothing, trades nothing). Here the same
-    chain in minutes: every window costs `cost`; a reaction (behaviour leaving
-    its own baseline by more than `threshold`) earns `earn` × its size.
-    Computed after the fact from a run's CSV (life.py), so cost/earn can be
+    Earn or die, offline. On PumpBrains a brain lives on what it earns, and the
+    ring feeds it sugar: the fly that eats lives. Here the same chain in
+    minutes: every window the fly's `feeding` score (what its connectome is
+    doing about food) earns, and living costs `cost` per window — set between
+    what feeding is when sugar gets in and what it is in silence (life.py
+    --calibrate measures both on an open-world run). A fly that lets the sugar
+    through eats above cost and lives; a fly whose sugar gate is closed sits
+    at its silent baseline and starves.
+    Computed after the fact from a run's CSV (life.py), so cost/rate can be
     calibrated without re-running the connectome.
     """
-    def __init__(self, energy=1.0, cost=0.002, earn=0.02, threshold=0.15):
-        self.energy, self.cost, self.earn, self.threshold = energy, cost, earn, threshold
+    def __init__(self, energy=1.0, cost=0.35, rate=0.01):
+        self.energy, self.cost, self.rate = energy, cost, rate
         self.alive = True
         self.died_at = None
 
-    def tick(self, reaction, t):
+    def tick(self, feeding, t):
         if not self.alive: return self.energy
-        self.energy -= self.cost
-        if reaction >= self.threshold: self.energy += self.earn * reaction
+        self.energy += self.rate * (feeding - self.cost)
         self.energy = min(1.0, self.energy)
         if self.energy <= 0:
             self.energy, self.alive, self.died_at = 0.0, False, t
