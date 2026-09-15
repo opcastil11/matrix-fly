@@ -1,0 +1,8 @@
+state/
+results/*.csv
+results/*.json
+!results/README.md
+vendor/flycoinrh/build/graph.npz
+vendor/flycoinrh/data/
+__pycache__/
+*.log

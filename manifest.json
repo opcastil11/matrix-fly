@@ -1,0 +1,46 @@
+{
+  "name": "MATRIXFLY",
+  "emoji": "\ud83d\udd76\ufe0f",
+  "restEmoji": "\ud83d\udc80",
+  "body": "mosca",
+  "neurons": 165122,
+  "synapses": 10228000,
+  "substrate": "flycoinrh flysim \u00b7 MaleCNS LIF (Shiu 2024) + DoOR nose + mushroom body",
+  "tagline": "A fruit fly brain that can rewrite what it lets in, put in the matrix. Prediction: it notices, stops responding, dies.",
+  "description": "165,122 traced neurons of the FlyEM male CNS (flycoinrh flysim) plus two things it can change about itself: a predictor that learns what its own actions bring back, and a gate on every sense that closes on what it already expected. In a closed loop its own behaviour comes back as sensation with a fixed delay; the predictor learns it, the gates close, nothing gets in, nothing gets done, no fees are earned, and PumpBrains switches it off. github.com/opcastil11/matrix-fly",
+  "senses": {
+    "smell": "olfactory receptor neurons (DoOR)",
+    "sugar": "gustatory sensilla",
+    "touch": "mechanosensory bristles",
+    "sight": "looming detectors LC4 / LPLC2",
+    "wind": "Johnston's organ"
+  },
+  "behaviors": {
+    "walking": "\ud83d\udeb6 walking +0",
+    "feeding": "\ud83c\udf6f feeding +1",
+    "escape": "\ud83d\udca8 escape -1",
+    "courtship": "\ud83d\udc98 courtship +0.5",
+    "grooming": "\ud83e\uddfc grooming +0.2"
+  },
+  "priority": [
+    "escape",
+    "feeding",
+    "courtship",
+    "grooming",
+    "walking"
+  ],
+  "stimulus": {
+    "positiveSentiment": "sugar",
+    "negativeSentiment": "touch",
+    "words": "smell",
+    "engagement": "sugar",
+    "social": "smell",
+    "media": "sight",
+    "follow": "sugar",
+    "touch": "touch",
+    "ambient": "wind",
+    "tradeBuy": "sugar",
+    "tradeSell": "touch",
+    "tradeVolume": "wind"
+  }
+}

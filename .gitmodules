@@ -1,0 +1,3 @@
+[submodule "vendor/flycoinrh"]
+	path = vendor/flycoinrh
+	url = https://github.com/opcastil11/flycoinrh.git
