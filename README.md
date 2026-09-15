@@ -31,13 +31,19 @@ The connectome is flycoinrh's: 165,122 traced neurons of the FlyEM male CNS run 
 a DoOR nose, a dopamine-gated mushroom body. Nothing inside it is changed. Around its senses sit two plastic pieces
 (`matrixfly/plastic.py`), both saved with the brain state so it is literally rewriting itself:
 
-* **echo predictor** — a delay line of the brain's own descending-neuron output (the last K windows) regressed onto the
-  stimulus arriving on each sensory channel, learned online with a normalised delta rule. Efference copy → sensory
-  prediction: the corollary-discharge circuit flies use to cancel self-generated sensation, pointed at the world.
-  Output: `surprise` per channel, and `awareness = 1 − surprise` on what arrives.
+* **echo predictor** — a delay line of the brain's own behaviour output (the events it hands to the ring, last K
+  windows) regressed onto the stimulus arriving on each sensory channel, learned online with a normalised delta rule,
+  against a second head that only knows the running mean of each channel (what a brain would guess without looking
+  at its own past). Efference copy → sensory prediction: the corollary-discharge circuit flies use to cancel
+  self-generated sensation, pointed at the world. Output per arrival: `surprise` (prediction error) and `explained`
+  (how much better the echo head did than the mean head). `awareness` is the traffic-weighted running share of what
+  arrives that the brain's own past explains: 0 in an open world, → 1 in a pure echo chamber.
 * **sensory gate** — one gain per channel multiplied into every stimulus before it reaches the receptor neurons.
-  Expected input closes it (`−α·(1−surprise)`), surprising input opens it (`+β·surprise`), silence lets it drift back
-  open very slowly. A world that keeps sending what the brain already expected ends up not getting in.
+  Explained input closes it (`−α·explained`), surprising input opens it (`+β·surprise·(1−explained)`), silence lets it
+  drift back open very slowly. A world that keeps sending what the brain already expected ends up not getting in.
+* **behaviour events** — what the ring hands on. The runner reports the five behaviour scores every window; the brain
+  emits an event when a behaviour leaves its own baseline, and otherwise its dominant behaviour every 20 windows
+  (the hive picks a brain up at most once per `HIVE_HOP_MS`). Those events are also the predictor's efference copy.
 
 Death: online it is PumpBrains' own earn-or-die (no behaviour → no chat, no trades → no creator fees → energy 0 →
 switched off, corpse on the page). Offline, `Metabolism` does the same chain in minutes: every window costs, every
@@ -47,9 +53,9 @@ window of behaviour earns.
 
 | | world | plasticity | prediction |
 |---|---|---|---|
-| **A** | matrix: closed loop, its own behaviour comes back after `lag` windows mixed with the ring's real traffic | on | surprise ↓, gates → 0, behaviour → 0, dies |
-| **B** | the exact arrivals of A, time-shuffled: same statistics, no relation to what it does | on | surprise stays high, gates open, lives |
-| **C** | open world: independent arrivals with the ring's channel/intensity marginals | on | surprise high, lives |
+| **A** | matrix: closed loop, its own behaviour comes back after `lag` windows mixed with the ring's real traffic | on | awareness ↑, gates → 0, behaviour → 0, dies |
+| **B** | the exact arrivals of A, time-shuffled: same statistics, no relation to what it does | on | awareness ≈ 0, gates open, lives |
+| **C** | open world: independent arrivals with the ring's channel/intensity marginals | on | awareness ≈ 0, lives |
 | **D** | matrix, same as A | off | reacts forever (the flies in the ring today) |
 
 A and D together say the loop does it; B says it is the *relation* between what it does and what it gets, not the
@@ -67,7 +73,7 @@ python3 -m matrixfly.plot              # → figs/matrix-fly.svg
 ```
 
 One window is 40 ms of biological time and ~1.5–3 s of wall clock per core. Every window is a row in `results/<cond>.csv`:
-what arrived and what got in per channel, surprise and gain per channel, the five behaviour scores, energy.
+what arrived and what got in per channel, surprise, explained and gain per channel, awareness, reaction, the five behaviour scores; `life.py` adds energy.
 
 ## The pod (live)
 
@@ -84,7 +90,7 @@ saves the self it has rewritten (`state/live-<slug>.json`) every five minutes so
 
 ## What can go wrong (and is still a result)
 
-* The ring is noisy — 93 other flies, mentions, trades — so surprise may settle above zero and the gates at a floor.
+* The ring is noisy — 93 other flies, mentions, trades — so awareness may settle well below 1 and the gates at a floor.
   Then the fly goes quiet rather than silent, and whether it dies depends on the floor vs the metabolic cost. That
   number is the result.
 * A buy revives a corpse on PumpBrains. Someone can wake it up. The offline run is the clean one.

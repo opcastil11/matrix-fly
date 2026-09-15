@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="760" viewBox="0 0 900 760">
+<style>text{font:13px system-ui,sans-serif;fill:#e5e7eb}.t{font-weight:600}.s{font-size:12px}.ax{font-size:11px;fill:#9ca3af}.p{fill:#111827;stroke:#374151}</style>
+<rect width="900" height="760" fill="#0b0f19"/>
+<text x="60" y="30" class="t" style="font-size:18px">matrix-fly — a self-modifying fly brain in a closed loop</text>
+<text x="60" y="62" class="t">awareness = share of what arrives that its own past explains</text>
+<rect x="60" y="70" width="800" height="130" class="p"/>
+<polyline points="60.0,199.7 220.0,199.7 380.0,199.7 540.0,199.7 700.0,199.7 860.0,199.7" fill="none" stroke="#ff3b3b" stroke-width="2"/>
+<text x="54" y="82" class="ax" text-anchor="end">1</text><text x="54" y="200" class="ax" text-anchor="end">0</text>
+<text x="60" y="232" class="t">sensory gain (mean of the five gates)</text>
+<rect x="60" y="240" width="800" height="130" class="p"/>
+<polyline points="60.0,240.0 220.0,240.0 380.0,240.0 540.0,240.0 700.0,240.0 860.0,240.0" fill="none" stroke="#ff3b3b" stroke-width="2"/>
+<text x="54" y="252" class="ax" text-anchor="end">1</text><text x="54" y="370" class="ax" text-anchor="end">0</text>
+<text x="60" y="402" class="t">reaction (behaviour leaving its own baseline)</text>
+<rect x="60" y="410" width="800" height="130" class="p"/>
+<polyline points="60.0,540.0 220.0,512.3 380.0,497.0 540.0,485.4 700.0,477.0 860.0,471.0" fill="none" stroke="#ff3b3b" stroke-width="2"/>
+<text x="54" y="422" class="ax" text-anchor="end">0.5</text><text x="54" y="540" class="ax" text-anchor="end">0</text>
+<text x="60" y="572" class="t">energy (earn or die)</text>
+<rect x="60" y="580" width="800" height="130" class="p"/>
+<polyline points="60.0,580.3 220.0,580.5 380.0,580.4 540.0,580.1 700.0,580.0 860.0,580.0" fill="none" stroke="#ff3b3b" stroke-width="2"/>
+<text x="54" y="592" class="ax" text-anchor="end">1</text><text x="54" y="710" class="ax" text-anchor="end">0</text>
+<text x="60" y="740" class="ax">windows of 40 ms biological time →</text>
+<rect x="60" y="752" width="14" height="14" fill="#ff3b3b"/><text x="80" y="764" class="s">A matrix (plastic)</text>
+</svg>

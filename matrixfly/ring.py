@@ -20,6 +20,7 @@ Hop → stimulus is the real mapping (stimulus.js fromPoke):
 """
 import json, random
 from collections import deque
+import numpy as np
 
 # hive channel → the fly's sensory population (the FLYBRAIN manifest's senses)
 HIVE_TO_SENSE = {"sugar": "sugar", "wind": "wind", "bristle": "touch", "taste_peg": "touch", "auditory": "wind", "pheromone": "smell", "smell": "smell", "touch": "touch", "sight": "sight"}
@@ -50,18 +51,19 @@ class World:
 
 
 class Matrix(World):
-    def __init__(self, log, lag=40, hop_every=20, threshold=0.25, mix=0.7, traffic_every=12, seed=0):
+    def __init__(self, log, lag=40, hop_every=20, mix=0.7, traffic_every=12, seed=0):
         super().__init__(seed)
-        self.log, self.lag, self.hop_every, self.threshold, self.mix, self.traffic_every = log, lag, hop_every, threshold, mix, traffic_every
+        self.log, self.lag, self.hop_every, self.mix, self.traffic_every = log, lag, hop_every, mix, traffic_every
         self.delay = deque([None] * lag, maxlen=lag)     # behaviour handed on `lag` windows ago
         self.last_hop = -10**9
 
     def tick(self, fly, n):
         # what the fly hands on this window (one hop per hop_every windows, like HIVE_HOP_MS)
+        # a hop is a behaviour *event* (hive.js onBehavior fires on transitions, not on standing levels): the ring
+        # hands on exactly what the fly emitted (fly.event), one per hop_every windows
         handed = None
-        b, s = max(fly.scores.items(), key=lambda kv: kv[1])
-        if s >= self.threshold and n - self.last_hop >= self.hop_every:
-            handed = (b, s); self.last_hop = n
+        if fly.event and n - self.last_hop >= self.hop_every:
+            handed = fly.event; self.last_hop = n
         self.delay.append(handed)
         back = self.delay[0]
         out = []

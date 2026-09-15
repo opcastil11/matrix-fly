@@ -23,7 +23,7 @@ from flysim import FlyBrain                      # noqa: E402
 from olfaction import Nose, MAX_HZ               # noqa: E402
 from mushroom import MushroomBody                # noqa: E402
 import calibration                               # noqa: E402
-from .plastic import EchoPredictor, Gate, CHANNELS, BEHAVIORS  # noqa: E402
+from .plastic import EchoPredictor, Gate, Reaction, CHANNELS, BEHAVIORS  # noqa: E402
 
 WINDOW_MS = float(os.environ.get("FLY_WINDOW_MS", 40))     # biological ms per window (state carried)
 SNIFF_MS = 20.0
@@ -34,7 +34,7 @@ def log(*a):
 
 
 class Fly:
-    def __init__(self, brain=None, plastic=True, K=64, lr=0.02, alpha=0.03, beta=0.10, recover=0.0005, seed=0):
+    def __init__(self, brain=None, plastic=True, K=64, lr=0.5, alpha=0.08, beta=0.05, recover=0.0005, seed=0):
         brain = brain or {"name": "MATRIXFLY", "symbol": "MATRIX", "description": "a fruit fly brain that can rewrite what it lets in"}
         t = time.time()
         self.fb = FlyBrain(VENDOR / "build" / "graph.npz")
@@ -73,10 +73,11 @@ class Fly:
         self.fired = np.array([], dtype=np.int64); self.sniffed = self.fired
         self.kc_hz = 0.0; self.mbon = (0.0, 0.0)
         self.rng = np.random.default_rng(seed)
-        # the plastic part
+        # the plastic part. plastic=False freezes the gate only: the brain still learns what it caused, it just cannot stop listening
         self.plastic = plastic
-        self.predictor = EchoPredictor(K=K, lr=lr if plastic else 0.0)
+        self.predictor = EchoPredictor(K=K, lr=lr)
         self.gate = Gate(alpha=alpha if plastic else 0.0, beta=beta if plastic else 0.0, recover=recover if plastic else 0.0)
+        self.reaction = Reaction(); self.react = 0.0; self.event = None
         self.arrived = {}          # channel → max raw intensity this window (before the gate)
         self.let_in = {}           # channel → intensity after the gate
         log(f"connectome {fb.n:,} neurons · {len(fb.wdata):,} edges · load {time.time()-t:.1f}s · plastic={plastic}")
@@ -143,10 +144,11 @@ class Fly:
         self.rates = {"ORN": hz["orn"], "KC": self.kc_hz, "MBON+": self.mbon[0], "MBON-": self.mbon[1], "PAM": hz["pam"], "PPL1": hz["ppl1"], "DNa02": hz["walking"], "GF": hz["escape"], "pC1": hz["courtship"], "DNg": hz["grooming"], "all": mean_hz, "lean": self.lean}
         # plasticity: what arrived this window vs what its own past predicted, then the gate
         surprise = self.predictor.observe(self.arrived)
-        self.gate.update(self.arrived, surprise)
-        self.predictor.push(self.scores)
+        self.gate.update(self.arrived, surprise, self.predictor.explained)
+        self.react = self.reaction.tick(self.scores); self.event = self.reaction.event
+        self.predictor.push(self.event)
         self.predictor.predict()
-        row = {"arrived": dict(self.arrived), "let_in": dict(self.let_in), "surprise": surprise.tolist(), "gain": self.gate.g.tolist()}
+        row = {"arrived": dict(self.arrived), "let_in": dict(self.let_in), "surprise": surprise.tolist(), "explained": self.predictor.explained.tolist(), "gain": self.gate.g.tolist(), "reaction": self.react, "event": self.event}
         self.arrived, self.let_in = {}, {}
         return row
 
