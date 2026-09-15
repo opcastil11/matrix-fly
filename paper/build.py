@@ -101,7 +101,7 @@ for c, r in runs.items():
     r["feed_first"] = float(r["feeding"][:1000].mean()); r["feed_last"] = float(r["feeding"][-1000:].mean())
     r["gains"] = {ch: float(r[f"gain_{ch}"][-1]) for ch in CHANNELS}
     r["arr"] = {ch: int((r[f"arrived_{ch}"] > 0).sum()) for ch in CHANNELS}
-    r["sugar_in"] = float(r["let_in_sugar"].sum() / max(1e-9, r["arrived_sugar"].sum()))
+    r["sugar_in"] = float((r["arrived_sugar"] * r["gain_sugar"]).sum() / max(1e-9, r["arrived_sugar"].sum()))
     r["echo"] = explained_on_echo(r)
     r["energy_end"] = float(r["energy"][-1])
 A = runs.get("A")
@@ -135,6 +135,42 @@ def sec_results():
 <p><b>Then it stops eating.</b> The connectome's feeding score is driven by sugar (Sec. 2.7: {f3(cal['fed'])} in the 15 windows after sugar gets in vs {f3(cal['quiet'])} in silence, measured on C). As A's sugar gate closes, its feeding falls from {f3(A['feed_first'])} over the first 1,000 windows to {f3(A['feed_last'])} over the last 1,000, while D holds at {f3(runs['D']['feed_first'])} → {f3(runs['D']['feed_last'])} and C at {f3(runs['C']['feed_first'])} → {f3(runs['C']['feed_last'])}. {verdict}</p>
 <p><b>The controls say what it is.</b> D shows the prediction alone does nothing to behaviour — it learns the loop just as well as A ({f3(runs['D']['aw3'][2])} vs {f3(A['aw3'][2])} in the last third) and keeps eating, because it cannot act on what it learned. C shows an open world with the same channel and intensity statistics does not produce the effect{(". B is the decisive one: the <i>identical</i> arrivals A received, in shuffled order, produce awareness " + f3(runs['B']['aw3'][2]) + ", gates at 1 and feeding " + f3(runs['B']['feed_last']) + " — the same stimuli, taken out of their relation to what the brain did, are just food") if 'B' in runs else ""}.</p>"""
 
+LOOP_SVG = """<svg viewBox="0 0 760 250" class="diagram" role="img" aria-label="the loop">
+<rect x="40" y="70" width="200" height="110" rx="6" class="dg-box"/>
+<text x="140" y="96" class="dg-t" text-anchor="middle" font-weight="500">fly brain · 165,122 LIF neurons</text>
+<text x="140" y="116" class="dg-m" text-anchor="middle">connectome untouched</text>
+<rect x="60" y="130" width="160" height="34" rx="4" class="dg-soft"/>
+<text x="140" y="151" class="dg-t" text-anchor="middle">readout · 5 behaviours / 40 ms</text>
+<path d="M240 125 H 310" class="dg-l" marker-end="url(#ar)"/>
+<text x="285" y="116" class="dg-m" text-anchor="middle">event</text>
+<rect x="310" y="95" width="170" height="60" rx="6" class="dg-box"/>
+<text x="395" y="119" class="dg-t" text-anchor="middle">the ring</text>
+<text x="395" y="137" class="dg-m" text-anchor="middle">delay 40 windows · 1.6 s</text>
+<text x="395" y="151" class="dg-m" text-anchor="middle">feeding→sugar · walking→touch</text>
+<path d="M480 125 H 520 V 205 H 140 V 180" class="dg-a" marker-end="url(#ara)"/>
+<text x="330" y="222" class="dg-m" text-anchor="middle">stimulus: rate, duration, fraction  (0.7 echo + 0.3 recorded ring traffic)</text>
+<rect x="560" y="60" width="180" height="56" rx="6" class="dg-box"/>
+<text x="650" y="82" class="dg-t" text-anchor="middle">echo predictor</text>
+<text x="650" y="100" class="dg-m" text-anchor="middle">own events (K=64) → ŝ per channel</text>
+<rect x="560" y="140" width="180" height="56" rx="6" class="dg-box"/>
+<text x="650" y="162" class="dg-t" text-anchor="middle">gate · g per channel</text>
+<text x="650" y="180" class="dg-m" text-anchor="middle">closes on explained, opens on surprise</text>
+<path d="M240 100 C 400 40, 500 40, 560 80" class="dg-l" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+<text x="400" y="52" class="dg-m" text-anchor="middle">efference copy</text>
+<path d="M650 116 V 140" class="dg-l" marker-end="url(#ar)"/>
+<path d="M560 168 H 530 V 205" class="dg-l"/>
+<text x="545" y="222" class="dg-m" text-anchor="middle">× g</text>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink)"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--a)"/></marker></defs>
+</svg>"""
+LIGHT={"--bg":"#f4f5f1","--ink":"#17201b","--mute":"#5d6862","--rule":"#d3d9d2","--soft":"#e9ece6","--a":"#b1401f"}
+def standalone(svg):
+    css=".dg-box{fill:#f4f5f1;stroke:#17201b;stroke-width:1.2}.dg-soft{fill:#e9ece6;stroke:#d3d9d2}.dg-t{font:11px IBM Plex Mono,DejaVu Sans Mono,monospace;fill:#17201b}.dg-m{font:10px IBM Plex Mono,DejaVu Sans Mono,monospace;fill:#5d6862}.dg-l{stroke:#17201b;stroke-width:1.2;fill:none}.dg-a{stroke:#b1401f;stroke-width:1.6;fill:none}"
+    out=svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="500" ',1).replace('class="diagram" ','')
+    for k,v in LIGHT.items(): out=out.replace(f"var({k})",v)
+    out=out.replace('→','->').replace('ŝ','s^')
+    out=out.replace('<rect x="40"', f'<style>{css}</style><rect width="760" height="250" fill="#f4f5f1"/><rect x="40"',1)
+    return out
+(ROOT/"figs"/"loop.svg").write_text(standalone(LOOP_SVG))
 figs_note = ""
 page = f"""<title>The Fly Finds the Glitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,33 +256,7 @@ ol.refs{{padding-left:1.4em;font-size:.92rem}}ol.refs li{{margin-bottom:8px}}
 <p>Input the brain's own past explains closes the gate (corollary-discharge cancellation, then habituation); input it cannot explain opens it (dishabituation); silence lets it drift back open slowly (spontaneous recovery). The gate acts on the rate, so the connectome downstream simply receives less — the predictor always sees the raw arrival, so learning is not starved by the closing. Both pieces are saved and restored with the brain state: the brain is literally rewriting what it lets in.</p>
 <h3>2.6 Worlds</h3>
 <figure>
-<svg viewBox="0 0 760 250" class="diagram" role="img" aria-label="the loop">
-<rect x="40" y="70" width="200" height="110" rx="6" class="dg-box"/>
-<text x="140" y="96" class="dg-t" text-anchor="middle" font-weight="500">fly brain · 165,122 LIF neurons</text>
-<text x="140" y="116" class="dg-m" text-anchor="middle">connectome untouched</text>
-<rect x="60" y="130" width="160" height="34" rx="4" class="dg-soft"/>
-<text x="140" y="151" class="dg-t" text-anchor="middle">readout · 5 behaviours / 40 ms</text>
-<path d="M240 125 H 330" class="dg-l" marker-end="url(#ar)"/>
-<text x="285" y="116" class="dg-m" text-anchor="middle">event</text>
-<rect x="330" y="95" width="130" height="60" rx="6" class="dg-box"/>
-<text x="395" y="119" class="dg-t" text-anchor="middle">the ring</text>
-<text x="395" y="137" class="dg-m" text-anchor="middle">delay 40 windows · 1.6 s</text>
-<text x="395" y="151" class="dg-m" text-anchor="middle">feeding→sugar · walking→touch</text>
-<path d="M460 125 H 520 V 205 H 140 V 180" class="dg-a" marker-end="url(#ara)"/>
-<text x="330" y="222" class="dg-m" text-anchor="middle">stimulus · rate, duration, fraction  (× 0.7 echo, 0.3 recorded ring traffic)</text>
-<rect x="560" y="60" width="180" height="56" rx="6" class="dg-box"/>
-<text x="650" y="82" class="dg-t" text-anchor="middle">echo predictor</text>
-<text x="650" y="100" class="dg-m" text-anchor="middle">own events (K=64) → ŝ per channel</text>
-<rect x="560" y="140" width="180" height="56" rx="6" class="dg-box"/>
-<text x="650" y="162" class="dg-t" text-anchor="middle">gate · g per channel</text>
-<text x="650" y="180" class="dg-m" text-anchor="middle">closes on explained, opens on surprise</text>
-<path d="M240 100 C 400 40, 500 40, 560 80" class="dg-l" stroke-dasharray="4 3" marker-end="url(#ar)"/>
-<text x="400" y="52" class="dg-m" text-anchor="middle">efference copy</text>
-<path d="M650 116 V 140" class="dg-l" marker-end="url(#ar)"/>
-<path d="M560 168 H 530 V 205" class="dg-l"/>
-<text x="545" y="230" class="dg-m" text-anchor="middle">× g</text>
-<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink)"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--a)"/></marker></defs>
-</svg>
+{LOOP_SVG}
 <figcaption><b>Figure 1.</b> The loop (condition A). The brain's behaviour events go to the ring; 40 windows later they come back as a stimulus on the mapped channel, mixed 70/30 with hops recorded from the live PumpBrains ring. The predictor sees the raw arrival and the brain's own events; the gate scales the stimulus before it reaches the receptor neurons.</figcaption>
 </figure>
 <div class="tw"><table>
@@ -267,7 +277,7 @@ ol.refs{{padding-left:1.4em;font-size:.92rem}}ol.refs li{{margin-bottom:8px}}
 <div class="tw"><table>
 <thead><tr><th>condition</th><th>windows</th><th class="wrap">awareness by thirds</th><th>peak</th><th>g sugar</th><th>g touch</th><th>g wind</th><th class="wrap">sugar let in</th><th class="wrap">feeding first → last 1,000</th><th class="wrap">life (cost {f3(cost)})</th></tr></thead>
 <tbody>{table2}</tbody></table></div>
-<figcaption><b>Table 2.</b> One number per claim. <i>awareness</i>: mean over each third of the run. <i>peak</i>: maximum of the 101-window smoothed awareness. <i>g</i>: gate gain at the end. <i>sugar let in</i>: Σ let_in / Σ arrived on the sugar channel over the whole run. <i>life</i>: energy at the end, or the window of death.</figcaption>
+<figcaption><b>Table 2.</b> One number per claim. <i>awareness</i>: mean over each third of the run. <i>peak</i>: maximum of the 101-window smoothed awareness. <i>g</i>: gate gain at the end. <i>sugar let in</i>: mean gate gain on the sugar channel at the moments sugar arrived, weighted by intensity, over the whole run. <i>life</i>: energy at the end, or the window of death.</figcaption>
 <figure>
 {fig_ts}
 <figcaption><b>Figure 2.</b> The four brains over time. Awareness, gain and feeding are 101-window moving averages (gain 51); energy is raw. Dashed line on the feeding panel: the calibrated cost of living.</figcaption>
@@ -306,4 +316,6 @@ ol.refs{{padding-left:1.4em;font-size:.92rem}}ol.refs li{{margin-bottom:8px}}
 """
 (ROOT / "paper").mkdir(exist_ok=True)
 (ROOT / "paper" / "index.html").write_text(page)
+(ROOT / "docs").mkdir(exist_ok=True)
+(ROOT / "docs" / "index.html").write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + page.replace("<main>", "</head><body>\n<main>", 1) + "</body></html>")
 print(ROOT / "paper" / "index.html", len(page) // 1024, "KB")

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1520" height="500" viewBox="0 0 760 250" role="img" aria-label="the loop">
+<style>.dg-box{fill:#f4f5f1;stroke:#17201b;stroke-width:1.2}.dg-soft{fill:#e9ece6;stroke:#d3d9d2}.dg-t{font:11px IBM Plex Mono,DejaVu Sans Mono,monospace;fill:#17201b}.dg-m{font:10px IBM Plex Mono,DejaVu Sans Mono,monospace;fill:#5d6862}.dg-l{stroke:#17201b;stroke-width:1.2;fill:none}.dg-a{stroke:#b1401f;stroke-width:1.6;fill:none}</style><rect width="760" height="250" fill="#f4f5f1"/><rect x="40" y="70" width="200" height="110" rx="6" class="dg-box"/>
+<text x="140" y="96" class="dg-t" text-anchor="middle" font-weight="500">fly brain · 165,122 LIF neurons</text>
+<text x="140" y="116" class="dg-m" text-anchor="middle">connectome untouched</text>
+<rect x="60" y="130" width="160" height="34" rx="4" class="dg-soft"/>
+<text x="140" y="151" class="dg-t" text-anchor="middle">readout · 5 behaviours / 40 ms</text>
+<path d="M240 125 H 310" class="dg-l" marker-end="url(#ar)"/>
+<text x="285" y="116" class="dg-m" text-anchor="middle">event</text>
+<rect x="310" y="95" width="170" height="60" rx="6" class="dg-box"/>
+<text x="395" y="119" class="dg-t" text-anchor="middle">the ring</text>
+<text x="395" y="137" class="dg-m" text-anchor="middle">delay 40 windows · 1.6 s</text>
+<text x="395" y="151" class="dg-m" text-anchor="middle">feeding->sugar · walking->touch</text>
+<path d="M480 125 H 520 V 205 H 140 V 180" class="dg-a" marker-end="url(#ara)"/>
+<text x="330" y="222" class="dg-m" text-anchor="middle">stimulus: rate, duration, fraction  (0.7 echo + 0.3 recorded ring traffic)</text>
+<rect x="560" y="60" width="180" height="56" rx="6" class="dg-box"/>
+<text x="650" y="82" class="dg-t" text-anchor="middle">echo predictor</text>
+<text x="650" y="100" class="dg-m" text-anchor="middle">own events (K=64) -> s^ per channel</text>
+<rect x="560" y="140" width="180" height="56" rx="6" class="dg-box"/>
+<text x="650" y="162" class="dg-t" text-anchor="middle">gate · g per channel</text>
+<text x="650" y="180" class="dg-m" text-anchor="middle">closes on explained, opens on surprise</text>
+<path d="M240 100 C 400 40, 500 40, 560 80" class="dg-l" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+<text x="400" y="52" class="dg-m" text-anchor="middle">efference copy</text>
+<path d="M650 116 V 140" class="dg-l" marker-end="url(#ar)"/>
+<path d="M560 168 H 530 V 205" class="dg-l"/>
+<text x="545" y="222" class="dg-m" text-anchor="middle">× g</text>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#17201b"/></marker><marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#b1401f"/></marker></defs>
+</svg>
