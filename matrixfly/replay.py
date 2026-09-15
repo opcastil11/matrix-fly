@@ -30,6 +30,8 @@ def main():
     ap.add_argument("--alpha", type=float, default=0.08); ap.add_argument("--beta", type=float, default=0.05); ap.add_argument("--recover", type=float, default=0.0005)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--resume", default=None, help="state/<cond>.json of a finished run: continue that brain, appending to --out from --start")
+    ap.add_argument("--start", type=int, default=0)
     a = ap.parse_args()
 
     hops = ring.load_log(a.log) if Path(a.log).exists() else []
@@ -45,10 +47,14 @@ def main():
 
     out = Path(a.out or ROOT / "results" / f"{a.cond}.csv"); out.parent.mkdir(parents=True, exist_ok=True)
     cols = ["n", "t_ms", "cond", "awareness", "reaction"] + [f"{k}_{c}" for k in ("arrived", "let_in", "surprise", "explained", "gain") for c in CHANNELS] + BEHAVIORS
-    fh = open(out, "w", newline=""); w = csv.DictWriter(fh, fieldnames=cols); w.writeheader()
-    fly.inject("smell", 120, 3000, 1.0, "birth")
+    if a.resume:
+        fly.load(a.resume); log(f"resumed plastic state from {a.resume}, continuing at window {a.start}")
+        fh = open(out, "a", newline=""); w = csv.DictWriter(fh, fieldnames=cols)
+    else:
+        fh = open(out, "w", newline=""); w = csv.DictWriter(fh, fieldnames=cols); w.writeheader()
+        fly.inject("smell", 120, 3000, 1.0, "birth")
     t0 = time.time()
-    for n in range(a.windows):
+    for n in range(a.start, a.start + a.windows):
         for (c, hz, ms, frac, src) in world.tick(fly, n):
             fly.inject(c, hz, ms, frac, src)
         row = fly.step(n)
@@ -60,7 +66,9 @@ def main():
         w.writerow(r); fh.flush()
         if n % 50 == 0:
             g = " ".join(f"{c[:3]}={fly.gate.g[i]:.2f}" for i, c in enumerate(CHANNELS))
-            log(f"{a.cond} n={n} · awareness {fly.predictor.awareness():.3f} · gate {g} · closed {fly.gate.closed()} · react {row['reaction']:.2f} · {(time.time()-t0)/(n+1):.2f}s/window")
+            log(f"{a.cond} n={n} · awareness {fly.predictor.awareness():.3f} · gate {g} · closed {fly.gate.closed()} · react {row['reaction']:.2f} · {(time.time()-t0)/(n-a.start+1):.2f}s/window")
+    if a.resume and out.with_suffix(".json").exists():
+        prev = json.load(open(out.with_suffix(".json"))); world.arrivals = [tuple(x) for x in prev.get("arrivals", [])] + world.arrivals
     summary = {"cond": a.cond, "windows": n + 1, "awareness": fly.predictor.awareness(), "gain": fly.gate.g.tolist(), "closed": fly.gate.closed(), "arrivals": world.arrivals, "args": vars(a)}
     json.dump(summary, open(out.with_suffix(".json"), "w"))
     fly.save(ROOT / "state" / f"{a.cond}.json")

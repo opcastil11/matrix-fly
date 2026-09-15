@@ -10,6 +10,7 @@ from .plastic import CHANNELS, BEHAVIORS
 
 ROOT = Path(__file__).resolve().parent.parent
 COLOR = {"A": "#ff3b3b", "B": "#2ea36f", "C": "#3b82f6", "D": "#9ca3af"}
+COST = None   # cost of living drawn on the feeding panel (set from life.py's calibration)
 LABEL = {"A": "A matrix (plastic)", "B": "B shuffled", "C": "C open world", "D": "D matrix, no plasticity"}
 
 
@@ -24,33 +25,38 @@ def load(path):
     return {"n": f("n"), "awareness": f("awareness"), "gain": gain, "act": f("feeding"), "energy": np.array([float(r["energy"]) for r in lrows]), "alive": np.array([float(r["alive"]) for r in lrows]), "cond": rows[0]["cond"]}
 
 
-def smooth(y, k=25):
+def smooth(y, k=101):
     if len(y) < k: return y
-    return np.convolve(y, np.ones(k) / k, mode="same")
+    yp = np.pad(y, (k // 2, k // 2), mode="edge")       # edge padding, so the ends do not sag toward 0
+    return np.convolve(yp, np.ones(k) / k, mode="valid")
 
 
 def panel(runs, key, title, y0, x, y, w, h, ylim=(0, 1)):
     s = [f'<text x="{x}" y="{y-8}" class="t">{title}</text>', f'<rect x="{x}" y="{y}" width="{w}" height="{h}" class="p"/>']
     nmax = max(r["n"][-1] for r in runs) or 1
     for r in runs:
-        ys = smooth(r[key]) if key != "energy" else r[key]
+        ys = smooth(r[key], 51 if key == "gain" else 101) if key != "energy" else r[key]
         pts = " ".join(f"{x + w * n / nmax:.1f},{y + h - h * (min(max(v, ylim[0]), ylim[1]) - ylim[0]) / (ylim[1] - ylim[0]):.1f}" for n, v in zip(r["n"], ys))
         s.append(f'<polyline points="{pts}" fill="none" stroke="{COLOR[r["cond"]]}" stroke-width="2"/>')
         dead = np.flatnonzero(r["alive"] == 0)
         if len(dead): s.append(f'<text x="{x + w * r["n"][dead[0]] / nmax:.1f}" y="{y + 16}" fill="{COLOR[r["cond"]]}" class="s">💀 {int(r["n"][dead[0]])}</text>')
+    if key == "act" and COST is not None:
+        yc = y + h - h * COST; s.append(f'<line x1="{x}" y1="{yc:.1f}" x2="{x+w}" y2="{yc:.1f}" stroke="#e5e7eb" stroke-dasharray="4 4" opacity="0.6"/>')
     s.append(f'<text x="{x-6}" y="{y+12}" class="ax" text-anchor="end">{ylim[1]}</text><text x="{x-6}" y="{y+h}" class="ax" text-anchor="end">{ylim[0]}</text>')
     return "\n".join(s)
 
 
 def main(paths):
+    global COST
+    if paths and paths[0].startswith("--cost="): COST = float(paths[0][7:]); paths = paths[1:]
     runs = [load(p) for p in paths]
-    W, H, PW, PH = 900, 760, 800, 130
+    W, H, PW, PH = 900, 790, 800, 130
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">',
            '<style>text{font:13px system-ui,sans-serif;fill:#e5e7eb}.t{font-weight:600}.s{font-size:12px}.ax{font-size:11px;fill:#9ca3af}.p{fill:#111827;stroke:#374151}</style>',
            f'<rect width="{W}" height="{H}" fill="#0b0f19"/>',
            '<text x="60" y="30" class="t" style="font-size:18px">matrix-fly — a self-modifying fly brain in a closed loop</text>']
     y = 70
-    for key, title, ylim in [("awareness", "awareness = share of what arrives that its own past explains", (0, 1)), ("gain", "sensory gain (mean of the five gates)", (0, 1)), ("act", "feeding (what earns)", (0, 1)), ("energy", "energy (earn or die)", (0, 1))]:
+    for key, title, ylim in [("awareness", "awareness = share of what arrives that its own past explains", (0, 1)), ("gain", "sensory gain (mean of the five gates)", (0, 1)), ("act", "feeding (what earns; dotted = cost of living)", (0, 1)), ("energy", "energy (earn or die)", (0, 1))]:
         out.append(panel(runs, key, title, 0, 60, y, PW, PH, ylim)); y += PH + 40
     out.append(f'<text x="60" y="{y-10}" class="ax">windows of 40 ms biological time →</text>')
     lx = 60
